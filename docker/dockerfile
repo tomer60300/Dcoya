@@ -1,0 +1,39 @@
+FROM alpine:latest
+
+RUN apk add --no-cache nginx gettext
+
+# Create a non-root user and group
+RUN addgroup -S nginx || true
+RUN adduser -S -D -G nginx -h /var/cache/nginx -s /sbin/nologin nginx || true
+
+# Create nginx directories and set permissions
+RUN mkdir -p /var/log/nginx && \
+    mkdir -p /var/lib/nginx && \
+    mkdir -p /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /var/lib/nginx && \
+    chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /etc/nginx
+
+
+WORKDIR /usr/share/nginx/html
+
+# Create temporary file to later inject environment var and apply
+COPY --chown=nginx:nginx ../nginx/nginx.conf /tmp/nginx.conf.template
+
+
+COPY --chown=nginx:nginx ../src/index.html .
+COPY --chown=nginx:nginx ../src/script.js .
+
+
+COPY --chown=nginx:nginx ../certs/nginx-selfsigned.crt /etc/nginx/certs/
+COPY --chown=nginx:nginx ../certs/nginx-selfsign.key /etc/nginx/certs/
+
+
+
+EXPOSE 443
+USER nginx
+
+CMD /bin/sh -c "envsubst < /tmp/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+
+
