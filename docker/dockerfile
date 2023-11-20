@@ -6,7 +6,7 @@ RUN apk add --no-cache nginx gettext
 RUN addgroup -S nginx || true
 RUN adduser -S -D -G nginx -h /var/cache/nginx -s /sbin/nologin nginx || true
 
-# Create nginx directories and set permissions
+# Create nginx directories and set permissions to nginx user
 RUN mkdir -p /var/log/nginx && \
     mkdir -p /var/lib/nginx && \
     mkdir -p /usr/share/nginx/html && \
