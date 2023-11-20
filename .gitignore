@@ -1,5 +1,3 @@
-# Environment variables and configuration files
-config/.env
 
 # Certificates
 certs/
