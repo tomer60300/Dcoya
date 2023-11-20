@@ -26,8 +26,8 @@ COPY --chown=nginx:nginx ../src/index.html .
 COPY --chown=nginx:nginx ../src/script.js .
 
 
-COPY --chown=nginx:nginx ../certs/nginx-selfsigned.crt /etc/nginx/certs/
-COPY --chown=nginx:nginx ../certs/nginx-selfsign.key /etc/nginx/certs/
+COPY --chown=nginx:nginx ../certs/dcoya-app.crt /etc/nginx/certs/
+COPY --chown=nginx:nginx ../certs/dcoya-app.key /etc/nginx/certs/
 
 
 
