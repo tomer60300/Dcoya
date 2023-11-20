@@ -4,7 +4,7 @@
 
 This project is a web-based application that displays the current date and time, along with the machine name. 
 It is built with HTML, JavaScript, 
-and powered by an Nginx and deployable on a Kubernetes cluster.
+and powered by a Nginx and deployable on a Kubernetes cluster.
 
 ## Project Structure
 
@@ -84,3 +84,41 @@ Run the test script:
 ```bash
 python scripts/status_check.py
 ```
+
+### Certificates
+To create self sign certificates run the following commands:
+
+First create a openssl.cnf with the following content
+```text
+[req]
+default_bits       = 2048
+prompt             = no
+default_md         = sha256
+distinguished_name = dn
+req_extensions     = req_ext
+
+[ dn ]
+C            = Country
+ST           = District
+L            = City
+O            = "Your Organization"
+OU           = "Your Organization"
+emailAddress = "Your Email"
+CN           = <host name>
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1   = <host name DNS name>
+IP.1    = <App exposed IP>
+```
+Then start creating the public and private keys for your app 
+```bash
+ openssl x509 -req -days 30 -in dcoya-app.csr -signkey dcoya-app.key -out dcoya-app.crt -extensions req_ext -extfile openssl.cnf
+```
+
+```bash
+openssl req -new -nodes -out dcoya-app.csr -config openssl.cnf -keyout dcoya-app.key
+```
+Now move the .crt and .key files into your project certs/ directory 
