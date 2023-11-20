@@ -24,41 +24,30 @@ class TestSite(unittest.TestCase):
     def test_date_accurate(self):
         asyncio.run(self.async_test_date_accurate())
 
-    async def async_test_date_being(self):
+    async def _site_date_manipulation(self):
         browser = await launch(ignoreHTTPSErrors=True, headless=True)
         page = await browser.newPage()
         await page.goto(self.url)
         await asyncio.sleep(2)
         try:
-            # Get the text from the element
             datetime_text = await page.evaluate('''() => {
                 const datetimeElement = document.querySelector('#datetime');
                 return datetimeElement ? datetimeElement.innerText : 'Date and time element not found.';
             }''')
-            self.assertIsNotNone(datetime_text, msg="There no date in the site")
-        except Exception as ex:
-            self.fail(f"An error occurred while evaluating the page: {ex}")
+            return datetime_text
         finally:
             await browser.close()
+
+    async def async_test_date_being(self):
+        datetime_text = await self._site_date_manipulation()
+        self.assertIsNotNone(datetime_text, msg="There no date in the site")
 
     async def async_test_date_accurate(self):
-        browser = await launch(ignoreHTTPSErrors=True, headless=True)
-
-        page = await browser.newPage()
-        await page.goto(self.url)
-        await asyncio.sleep(2)
-
-        try:
-            datetime_text = await page.evaluate('''() => {
-                const datetimeElement = document.querySelector('#datetime');
-                return datetimeElement ? datetimeElement.innerText : 'Date and time element not found.';
-            }''')
+        datetime_text = await self._site_date_manipulation()
+        if datetime_text:
             site_date = datetime.strptime(datetime_text.split(',')[0], '%m/%d/%Y').date()
-
             self.assertEqual(site_date, datetime.now().date(),
-                             f"Site date f{site_date} isn't the current date {datetime.now().date()}")
-        finally:
-            await browser.close()
+                             msg=f"Site date f{site_date} isn't the current date {datetime.now().date()}")
 
     def test_ssl_handshake(self):
         context = ssl.create_default_context(cafile=self.certificate_path)
